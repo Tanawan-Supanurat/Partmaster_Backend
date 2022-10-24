@@ -69,7 +69,6 @@ namespace Testapi.Controllers
             }
         }
    
-        //test add comment
         [HttpGet]
         [Route("api/KensakuBtnGet")]
         public List<PMKensaku> ShousaiKensaku(
