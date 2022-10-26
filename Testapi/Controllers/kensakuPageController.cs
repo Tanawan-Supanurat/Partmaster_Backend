@@ -193,18 +193,25 @@ namespace Testapi.Controllers
                 sql += SqlTable.getSQLBuhimei(PART_NO, PART_NAME_LOC1, PART_NO_OPTION);                                 //部品コード 部品名
                 sql += SqlTable.getSQLHoshuZumei(MAINT_PART_NAME, MAINT_PART_NAME_OPTION,                               //保守部品名
                                                  DWG_NO,DWG_NO_OPTION);                                                 //図番
+                
                 sql += SqlTable.getSQLHyoujuuhakko(ISSUE_DATE_1, ISSUE_DATE_2,true);                                    //標準図発行日
+                
                 sql += SqlTable.getSQLPM_Mask(PRODUCT_CODE, PART_TYPE, PDM_TYPE,                                        //製品分類コード 部品区分 PDMタイプ
                                               MACHINE_TYPE, SELLING_PRICE_TYPE, MAKER_PART_NO);                         //機種 価格設定 メーカー型番
+                
                 sql += SqlTable.getSQLPCEntandSONotEnt(ckPCEntandSPNoEnt_Checked);                                      //PC登録済 かつ SP未登録
+               
                 //手配マスタ系
                 sql += SqlTable.getSQLPPPMORDER_Mask(PLANT_NO, MFG_TYPE, STOCK_TYPE,                                    //工場区分 内外作区分 貯蔵区分
                                                     ARR_BRANCH_CODE, ARR_WHO,PO_BRANCH_CODE,                            //管理店所 在庫担当 発注店所
                                                     PO_WHO, BUCKET, ORDER_TYPE, ABC_TYPE,                               //発注担当 バケット 管理基準 ABC区分
                                                     STOCK_TYPE, ROUTING_CODE);                                          //在庫管理コード 工程コード
+                
                 //注文マスタ系
                 sql += SqlTable.getSQLCHMSA_Mask(VENDOR_CODE, SG_CODE);                                                 //取引先コード 作業コード
-                //在庫マスタ系　【未完】倉庫情報未追加
+                                                                                                                        //在庫マスタ系　【未完】倉庫情報未追加
+
+                                                                                                                        
                 sql += SqlTable.getSQLZKMS_Mask(ckUselWHCode_Checked,                                                   //倉庫コードチェックボックス 倉庫【追加予定】
                                                 LOCATION, SOKO_TANTO, PS_FLAG,                                          //置場/棚番　倉庫担当　P/S展開区分
                                                 AUTO_PURCHASE_REQ, ckMoreZero_Checked, CURRENT_BALANCE_1,               //自動購入指示　在庫数チェックボックス　在庫数１
@@ -213,8 +220,9 @@ namespace Testapi.Controllers
                                                 LAST_RECEIPT_DATE_1,LAST_RECEIPT_DATE_2, ckNoIssue_Checked,             //最終入庫日１　最終入庫日2　最終出庫日チェックボックス
                                                 LAST_ISSUE_DATE_1, LAST_ISSUE_DATE_2,STOCK_START_DATE_1,                //最終出庫日1 最終出庫日2 貯蔵開始日1
                                                 STOCK_START_DATE_2, STOCK_STOP_FlAG, STOCK_STOP_DATE);                  // 貯蔵開始日2 貯蔵中止予定 貯蔵止め
+
                 //保守マスタ系
-                sql += SqlTable.getSQLPPPMMAINTMS_Mask(PART_LOCATION, MACHINE_TYPE);
+                sql += SqlTable.getSQLPPPMMAINTMS_Mask(PART_LOCATION, MAINT_TYPE);
                 //検索条件を追加
                 sql += SqlTable.getSQLOption(ckPPPMMAINTMS2_notEdit_Checked, ckRepairRepEnt_Checked,
                                     ckPartDescAndRepReason_Checked, ckNoPhoto_Checked);
@@ -224,7 +232,69 @@ namespace Testapi.Controllers
                 return result;
             }
         }
-         // POST api/<controller>
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<DialogKoumoku> getDialogs(string CM_KOUNO, string START_DATE,string STOP_DATE)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                CM_KOUNO = DbContext.FixedSQLi(CM_KOUNO);
+                START_DATE = DbContext.FixedSQLi(START_DATE);
+                STOP_DATE = DbContext.FixedSQLi(STOP_DATE);
+
+                string sql = SqlTable.getSQLDialogKoumoku(CM_KOUNO, START_DATE, STOP_DATE);
+                var result = DbContext.Database.SqlQuery<DialogKoumoku>(sql).ToList();
+                return result;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<CM_KOUNOLIST> getSokoType(string CM_KOUNO)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                CM_KOUNO = DbContext.FixedSQLi(CM_KOUNO);
+
+                string sql = "SELECT CM_CODE,CM_CODE_SETUMEI from cmmsb where cm_kouno = '"+ CM_KOUNO +"' order by CM_CODE ";
+                var result = DbContext.Database.SqlQuery<CM_KOUNOLIST>(sql).ToList();
+                return result;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<CM_KOUNOLIST> getSokoInfo(string CM_KOUNO,string data3)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                string sql = "";
+                CM_KOUNO = DbContext.FixedSQLi(CM_KOUNO);
+                data3 = DbContext.FixedSQLi(data3);
+                if (data3 == "-")
+                {
+                    sql += "select CM_CODE,CM_CODE_SETUMEI from cmmsb where CM_KOUNO = '310' order by CM_CODE";
+                }
+                else
+                {
+                    sql += "select CM_CODE,CM_CODE_SETUMEI from cmmsb where CM_KOUNO = '" + CM_KOUNO + "'";
+                    sql += " and data3 = '" + data3 + "' order by CM_CODE";
+                }
+                var result = DbContext.Database.SqlQuery<CM_KOUNOLIST>(sql).ToList();
+                return result;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<KouteiCode> getKouteiInfo(string KT_START_DATE, string KT_STOP_DATE)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                string sql = "";
+                sql += "select * from ktktms where START_DATE <= '" + KT_START_DATE + "' and stop_date >= '" + KT_STOP_DATE + "' order by 1";
+                var result = DbContext.Database.SqlQuery<KouteiCode>(sql).ToList();
+                return result;
+            }
+        }
+        // POST api/<controller>
         public void Post([FromBody]string value)
         {
         }

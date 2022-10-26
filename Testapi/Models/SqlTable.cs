@@ -149,7 +149,7 @@ namespace Testapi.Models
             if (MACHINE_TYPE != null)
             { sql += " and PM.MACHINE_TYPE = '" + MACHINE_TYPE + "'"; }
             //価格設定(販売価格判定)
-            if (SELLING_PRICE_TYPE != null)
+            if (SELLING_PRICE_TYPE != null && SELLING_PRICE_TYPE != "-")
             { sql += " and PM.SELLING_PRICE_TYPE = '" + SELLING_PRICE_TYPE + "'"; }
             //メーカー型番
             if (MAKER_PART_NO != null)
@@ -462,11 +462,11 @@ namespace Testapi.Models
                 sql += " and PPPMMAINTMS.PART_LOCATION = '" + PART_LOCATION + "'";
             }
             //保守判定
-            if (MAINT_TYPE != null)
+            if (MAINT_TYPE != null && MAINT_TYPE != "-")
             {
                 sql += " and PPPMMAINTMS.MAINT_TYPE = '" + MAINT_TYPE + "'";
             }
-            return getSQLPPPMMAINTMS_Base() + sql +")";
+            return sql != ""?getSQLPPPMMAINTMS_Base() + sql +")":sql;
         }
         //図面発行後、二次判定が一度も設定されていないもの。
         public static string getSQLckPPPMMAINTMS2_notEdit()
@@ -510,6 +510,16 @@ namespace Testapi.Models
             {
                 sql += getSQLckPartDescAndRepReason();
             }
+            return sql;
+        }
+        public static string getSQLDialogKoumoku(string CM_KOUNO,string START_DATE,string STOP_DATE)
+        {
+            string sql = "";
+            sql += "SELECT CM_CODE,CM_CODE_SETUMEI,START_DATE,STOP_DATE FROM cmmsb WHERE ";
+            sql += "CM_KOUNO = '" + CM_KOUNO + "'";
+            sql += " and START_DATE <= '" + START_DATE + "'";
+            sql += " and STOP_DATE >= '" + STOP_DATE + "'";
+            sql += " ORDER BY sort_index,CM_CODE ";
             return sql;
         }
     }

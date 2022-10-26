@@ -216,6 +216,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CM_KOUNOLIST.cs" />
+    <Compile Include="Models\DialogKoumoku.cs" />
+    <Compile Include="Models\KouteiCode.cs" />
     <Compile Include="Models\PMKensaku.cs" />
     <Compile Include="Models\SqlTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
