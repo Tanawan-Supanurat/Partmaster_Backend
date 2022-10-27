@@ -336,7 +336,8 @@ namespace Testapi.Models
             return " and PM.PART_NO in (  select PART_NO  from  ZKMS  where   ZKMS.PART_NO IS NOT NULL";
         }
         //在庫マスタ系
-        public static string getSQLZKMS_Mask(bool ckUselWHCode_Checked, string LOCATION,string SOKO_TANTO,string PS_FLAG,
+        public static string getSQLZKMS_Mask(bool ckUselWHCode_Checked,string[] pWhCode,
+                                            string LOCATION,string SOKO_TANTO,string PS_FLAG,
                                             string AUTO_PURCHASE_REQ,bool ckMoreZero_Checked, string CURRENT_BALANCE_1,
                                             string CURRENT_BALANCE_2,string eStockAmount_1,string eStockAmount_2,
                                             string YOTEI_TANKA_1,string YOTEI_TANKA_2,bool ckNoReceipt_Checked,
@@ -346,7 +347,25 @@ namespace Testapi.Models
         {
             string sql = "";
             //倉庫コード 【未完】
-            //if (ckUselWHCode_Checked) { }
+            if (ckUselWHCode_Checked)
+            {
+                
+                int count = 0;
+                foreach(string str in pWhCode)
+                {
+                    if(count == 0)
+                    {
+                        sql += " and ( ZKMS.WH_CODE = '" + str;
+                    }
+                    else
+                    {
+                        sql += "' or ZKMS.WH_CODE = '" + str;
+                    }
+                    count++;
+                }
+                if (count != 0)
+                    sql += "' )";
+              }
             //置場/棚番
             if (LOCATION != null) 
             { sql += " and ZKMS.LOCATION =  '" + LOCATION + "'"; }
@@ -512,6 +531,7 @@ namespace Testapi.Models
             }
             return sql;
         }
+        //参照画面（共用マスタ）データを取得
         public static string getSQLDialogKoumoku(string CM_KOUNO,string START_DATE,string STOP_DATE)
         {
             string sql = "";

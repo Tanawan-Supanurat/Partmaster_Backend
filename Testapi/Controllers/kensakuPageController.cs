@@ -102,8 +102,8 @@ namespace Testapi.Controllers
             string ROUTING_CODE,                                //工程コード
             string VENDOR_CODE,                                 //取引先コード
             string SG_CODE,                                     //作業コード
-            bool ckUselWHCode_Checked,                           //倉庫コードチェックボックス
-            //string pWhCode,                                     //倉庫コード   //ERROR
+            bool ckUselWHCode_Checked,                          //倉庫コードチェックボックス
+            [FromUri]string[] pWhCode,                                      //倉庫コード   //ERROR
             string LOCATION,                                    //置場/棚番
             string SOKO_TANTO,                                  //倉庫担当
             string PS_FLAG,                                     //P/S展開区分
@@ -212,7 +212,7 @@ namespace Testapi.Controllers
                                                                                                                         //在庫マスタ系　【未完】倉庫情報未追加
 
                                                                                                                         
-                sql += SqlTable.getSQLZKMS_Mask(ckUselWHCode_Checked,                                                   //倉庫コードチェックボックス 倉庫【追加予定】
+                sql += SqlTable.getSQLZKMS_Mask(ckUselWHCode_Checked , pWhCode,                                         //倉庫コードチェックボックス 倉庫【追加予定】
                                                 LOCATION, SOKO_TANTO, PS_FLAG,                                          //置場/棚番　倉庫担当　P/S展開区分
                                                 AUTO_PURCHASE_REQ, ckMoreZero_Checked, CURRENT_BALANCE_1,               //自動購入指示　在庫数チェックボックス　在庫数１
                                                 CURRENT_BALANCE_2,eStockAmount_1, eStockAmount_2,                       //在庫数2　在庫金額1　在庫金額2
@@ -293,6 +293,19 @@ namespace Testapi.Controllers
                 var result = DbContext.Database.SqlQuery<KouteiCode>(sql).ToList();
                 return result;
             }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public string getArrayParameter_Test([FromUri] string[] arr)
+        {
+            string Array_value ="";
+
+            foreach (string str in arr)
+            {
+                Array_value += str;
+            }
+            
+            return Array_value;
         }
         // POST api/<controller>
         public void Post([FromBody]string value)
