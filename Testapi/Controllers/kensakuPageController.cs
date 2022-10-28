@@ -296,17 +296,21 @@ namespace Testapi.Controllers
         }
         [HttpGet]
         [Route("api/KensakuBtnGet")]
-        public string getArrayParameter_Test([FromUri] string[] arr)
+        public List<HeaderID> getHeaderInfo(string Table_Id)
         {
-            string Array_value ="";
-
-            foreach (string str in arr)
+            using (var DbContext = new TablesDbContext())
             {
-                Array_value += str;
+                string sql = "";
+                sql += "select PM.PART_NO,PM.PART_REV_NO,PM.PART_NAME_LOC1,PM.UPD_WHO,JNV.USER_NAME UPD_NAME,PM.UPD_WHEN,PM.ENT_WHO,JNV_ENT.USER_NAME ENT_NAME,PM.ENT_WHEN " +
+                       ",PM.REV_START_DATE,PM.REV_STOP_DATE,PM.M_START_DATE,PM.M_STOP_DATE,PM.CUR_TYPE,PM.APP_CUR_TYPE " + " From PPPMMS PM ";
+                sql += " FULL JOIN JNV_JNSHAIN_01 JNV on PM.UPD_WHO = JNV.USER_ID ";
+                sql += " FULL JOIN JNV_JNSHAIN_01 JNV_ENT on PM.ENT_WHO = JNV_ENT.USER_ID ";
+                sql += " where PM.PART_NO = '" + Table_Id + "'";
+                var result = DbContext.Database.SqlQuery<HeaderID>(sql).ToList();
+                return result;
             }
-            
-            return Array_value;
         }
+
         // POST api/<controller>
         public void Post([FromBody]string value)
         {

@@ -218,6 +218,7 @@
     </Compile>
     <Compile Include="Models\CM_KOUNOLIST.cs" />
     <Compile Include="Models\DialogKoumoku.cs" />
+    <Compile Include="Models\HeaderID.cs" />
     <Compile Include="Models\KouteiCode.cs" />
     <Compile Include="Models\PMKensaku.cs" />
     <Compile Include="Models\SqlTable.cs" />
