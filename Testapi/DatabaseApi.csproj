@@ -216,12 +216,18 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CHOUMON.cs" />
     <Compile Include="Models\CM_KOUNOLIST.cs" />
     <Compile Include="Models\DialogKoumoku.cs" />
+    <Compile Include="Models\EditInfo.cs" />
     <Compile Include="Models\HeaderID.cs" />
+    <Compile Include="Models\IndividualSettting.cs" />
     <Compile Include="Models\KouteiCode.cs" />
     <Compile Include="Models\PMKensaku.cs" />
     <Compile Include="Models\SqlTable.cs" />
+    <Compile Include="Models\TANTAI.cs" />
+    <Compile Include="Models\TANTOU.cs" />
+    <Compile Include="Models\TESTCLASS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

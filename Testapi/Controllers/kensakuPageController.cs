@@ -300,20 +300,258 @@ namespace Testapi.Controllers
         {
             using (var DbContext = new TablesDbContext())
             {
+                Table_Id = DbContext.FixedSQLi(Table_Id);
                 string sql = "";
                 sql += "select PM.PART_NO,PM.PART_REV_NO,PM.PART_NAME_LOC1,PM.UPD_WHO,JNV.USER_NAME UPD_NAME,PM.UPD_WHEN,PM.ENT_WHO,JNV_ENT.USER_NAME ENT_NAME,PM.ENT_WHEN " +
                        ",PM.REV_START_DATE,PM.REV_STOP_DATE,PM.M_START_DATE,PM.M_STOP_DATE,PM.CUR_TYPE,PM.APP_CUR_TYPE " + " From PPPMMS PM ";
                 sql += " FULL JOIN JNV_JNSHAIN_01 JNV on PM.UPD_WHO = JNV.USER_ID ";
                 sql += " FULL JOIN JNV_JNSHAIN_01 JNV_ENT on PM.ENT_WHO = JNV_ENT.USER_ID ";
-                sql += " where PM.PART_NO = '" + Table_Id + "'";
+                sql += " where PM.PART_NO = '" + Table_Id + "' ";
+                sql += " and PM.PART_REV_NO <= (select PART_REV_NO from pppmms where part_no ='" + Table_Id + "' and APP_CUR_TYPE =1)";
                 var result = DbContext.Database.SqlQuery<HeaderID>(sql).ToList();
                 return result;
             }
         }
 
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<EditInfo> getEditInfo(string Edit_PART_NO,string Edit_REV_NO,string USER_ID)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                Edit_PART_NO = DbContext.FixedSQLi(Edit_PART_NO);
+                Edit_REV_NO = DbContext.FixedSQLi(Edit_REV_NO);
+                USER_ID = DbContext.FixedSQLi(USER_ID);
+                //個人設定を確認
+                bool CheckIndiviSet = false;
+                
+                string IndivSetSQL = "select DISTINCT USER_ID from SYDBGRID where DBGRID_NAME='PPPMMS' order by USER_ID";
+                var resultIndiviSet = DbContext.Database.SqlQuery<IndividualSettting>(IndivSetSQL).ToList();
+                foreach (var user in resultIndiviSet)
+                {
+                //個人設定を確認できたら個人並び順に変更
+                    if(USER_ID == user.USER_ID)
+                    {
+                        CheckIndiviSet = true;
+                    }
+                }
+                
+          　　　
+                string sql = "SELECT COLUMN_NAME FROM all_tab_cols where TABLE_NAME = 'PPPMMS' and DATA_TYPE != 'NUMBER' order by INTERNAL_COLUMN_ID";
+                string sql_num = "SELECT COLUMN_NAME FROM all_tab_cols where TABLE_NAME = 'PPPMMS' and DATA_TYPE = 'NUMBER' order by INTERNAL_COLUMN_ID";
+                string In_Con = "";
+                string In_Con_Num = "";
+                string In_Con_Num_where = "";
+                var result = DbContext.Database.SqlQuery<TESTCLASS>(sql).ToList();
+                var result_num = DbContext.Database.SqlQuery<TESTCLASS>(sql_num).ToList();
+                foreach (var str in result)
+                {
+                    if (In_Con == "")
+                    {
+                        In_Con = str.COLUMN_NAME;
+                    }
+                    else
+                    {
+                        In_Con += "," + str.COLUMN_NAME;
+                    }
+                }
+                foreach (var str in result_num)
+                {
+                    if (In_Con_Num == "")
+                    {
+                        In_Con_Num = str.COLUMN_NAME;
+                        In_Con_Num_where = "'" + str.COLUMN_NAME + "'";
+                    }
+                    else
+                    {
+                        In_Con_Num += "," + str.COLUMN_NAME;
+                        In_Con_Num_where += ",'" + str.COLUMN_NAME + "'";
+                    }
+                }
+
+                string sql_2 = "";
+                string sql_3 = "";
+
+                sql_2 += "select PMTH.AUTH_TYPE,PMHD.*,NEWTABLE.FIELD_VALUE from( ";
+                sql_2 += "select TABLE_NAME, FIELD_NAME, MAX(AUTH_TYPE) AUTH_TYPE from PPPMTABLEAUTHMNG where ";
+                sql_2 += "MNG_NO IN (select ROLE_ID from CPUMGSSO_USER_ROLE_MST where USER_ID = '"+USER_ID +"' ";
+                sql_2 += "and ROLE_ID in ('1','2','3','4','5','6','7','8','9','10','99')) and TABLE_NAME = 'PPPMMS' group by FIELD_NAME,TABLE_NAME";
+                sql_2 += " ) PMTH ";
+                sql_2 += " full join PPPMTABLEhdrMNG PMHD on PMHD.TABLE_NAME = PMTH.TABLE_NAME and PMHD.FIELD_NAME = PMTH.FIELD_NAME";
+
+                sql_3 = sql_2;
+
+                sql_2 += "  LEFT JOIN ( select FIELD_NAME,FIELD_VALUE From (select * FROM PPPMMS where PART_NO =  '" + Edit_PART_NO;
+                sql_2 += "' and PART_REV_NO = " + Edit_REV_NO + ") UNPIVOT  INCLUDE NULLS(FIELD_VALUE FOR FIELD_NAME ";
+                sql_2 += " IN(" + In_Con + " ))) ";
+                sql_2 += " NEWTABLE on PMTH.FIELD_NAME = NEWTABLE.FIELD_NAME ";
+
+                sql_2 += " where PMTH.TABLE_NAME = 'PPPMMS' ";
+                sql_2 += " and AUTH_TYPE <> 0 and PMHD.FIELD_NAME NOT IN (" + In_Con_Num_where + ")";
+                sql_2 = CheckIndiviSet ?
+                    "select SYD.SEQ_NO FIELD_SEQ_NO ,BASE.* from (" + sql_2+ ") BASE left join(select SEQ_NO, DBGRID_NAME, FIELD_NAME from SYDBGRID where DBGRID_NAME = 'PPPMMS' and USER_ID = '" + USER_ID + 
+                    "') SYD on BASE.FIELD_NAME = SYD.FIELD_NAME where SYD.FIELD_NAME IS NOT NULL  order by SYD.SEQ_NO"
+                    : sql_2 + " order by PMHD.FIELD_SEQ_NO ";
+                var result_2 = DbContext.Database.SqlQuery<EditInfo>(sql_2).ToList();
+
+                sql_3 += "  LEFT JOIN ( select FIELD_NAME,FIELD_VALUE From (select * FROM PPPMMS where PART_NO =  '" + Edit_PART_NO;
+                sql_3 += "' and PART_REV_NO = " + Edit_REV_NO + ") UNPIVOT  INCLUDE NULLS(FIELD_VALUE FOR FIELD_NAME ";
+                sql_3 += " IN(" + In_Con_Num + " ))) ";
+                sql_3 += " NEWTABLE on PMTH.FIELD_NAME = NEWTABLE.FIELD_NAME ";
+
+                sql_3 += " where PMTH.TABLE_NAME = 'PPPMMS' ";
+                sql_3 += " and AUTH_TYPE <> 0 and PMHD.FIELD_NAME IN (" + In_Con_Num_where + ")";
+                sql_3 = CheckIndiviSet ?
+                    "select SYD.SEQ_NO FIELD_SEQ_NO ,BASE.* from (" + sql_3 + ") BASE left join(select SEQ_NO, DBGRID_NAME, FIELD_NAME from SYDBGRID where DBGRID_NAME = 'PPPMMS' and USER_ID = '" + USER_ID +
+                    "') SYD on BASE.FIELD_NAME = SYD.FIELD_NAME where SYD.FIELD_NAME IS NOT NULL  order by SYD.SEQ_NO"
+                    : sql_3 + " order by PMHD.FIELD_SEQ_NO ";
+                var result_3 = DbContext.Database.SqlQuery<EditInfo>(sql_3).ToList();
+                result_2.AddRange(result_3);
+
+                result_2.Sort((a, b) => Int32.Parse(a.FIELD_SEQ_NO) - Int32.Parse(b.FIELD_SEQ_NO));
+
+                return result_2;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<EditInfo> GetTestdata(string Test)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                string sql = "SELECT COLUMN_NAME FROM all_tab_cols where TABLE_NAME = 'PPPMMS' and DATA_TYPE != 'NUMBER' order by INTERNAL_COLUMN_ID";
+                string sql_num = "SELECT COLUMN_NAME FROM all_tab_cols where TABLE_NAME = 'PPPMMS' and DATA_TYPE = 'NUMBER' order by INTERNAL_COLUMN_ID";
+                string In_Con = "";
+                string In_Con_Num = "";
+                string In_Con_Num_where = "";
+                var result = DbContext.Database.SqlQuery<TESTCLASS>(sql).ToList();
+                var result_num = DbContext.Database.SqlQuery<TESTCLASS>(sql_num).ToList();
+                foreach (var str in result)
+                {
+                    if(In_Con == "")
+                    {
+                        In_Con = str.COLUMN_NAME;
+                    }
+                    else
+                    {
+                        In_Con += "," + str.COLUMN_NAME ;
+                    }
+                }
+                foreach (var str in result_num)
+                {
+                    if (In_Con_Num == "")
+                    {
+                        In_Con_Num = str.COLUMN_NAME;
+                        In_Con_Num_where = "'" + str.COLUMN_NAME + "'";
+                    }
+                    else
+                    {
+                        In_Con_Num += "," + str.COLUMN_NAME;
+                        In_Con_Num_where += ",'" + str.COLUMN_NAME +"'";
+                    }
+                }
+                
+                string sql_2 = "";
+
+                sql_2 += "select PMTH.AUTH_TYPE,PMHD.*,NEWTABLE.FIELD_VALUE from PPPMTABLEAUTHMNG PMTH ";
+                sql_2 += " full join PPPMTABLEhdrMNG PMHD on PMHD.TABLE_NAME = PMTH.TABLE_NAME ";
+                sql_2 += " and PMHD.FIELD_NAME = PMTH.FIELD_NAME ";
+
+                sql_2 += "  LEFT JOIN ( select FIELD_NAME,FIELD_VALUE From (select * FROM PPPMMS where PART_NO =  '5310GAF001' and PART_REV_NO ='000' )";
+                sql_2 += " UNPIVOT  INCLUDE NULLS(FIELD_VALUE FOR FIELD_NAME ";
+                sql_2 += " IN(" + In_Con + " ))) ";
+                sql_2 += " NEWTABLE on PMTH.FIELD_NAME = NEWTABLE.FIELD_NAME ";
+
+                sql_2 += " where PMTH.TABLE_NAME = 'PPPMMS' ";
+                sql_2 += " and PMTH.MNG_NO = '1' ";
+                sql_2 += " and AUTH_TYPE <> 0 and PMHD.FIELD_NAME NOT IN (" + In_Con_Num_where +")";
+                sql_2 += " order by PMTH.FIELD_SEQ_NO ";
+                var result_2 = DbContext.Database.SqlQuery<EditInfo>(sql_2).ToList();
+
+                string sql_3 = "";
+
+                sql_3 += "select PMTH.AUTH_TYPE,PMHD.*,NEWTABLE.FIELD_VALUE from PPPMTABLEAUTHMNG PMTH ";
+                sql_3 += " full join PPPMTABLEhdrMNG PMHD on PMHD.TABLE_NAME = PMTH.TABLE_NAME ";
+                sql_3 += " and PMHD.FIELD_NAME = PMTH.FIELD_NAME ";
+
+                sql_3 += " LEFT JOIN (select FIELD_NAME,FIELD_VALUE From (select * FROM PPPMMS where PART_NO =  '5310GAF001' and PART_REV_NO ='000' )";
+                sql_3 += " UNPIVOT  INCLUDE NULLS(FIELD_VALUE FOR FIELD_NAME ";
+                sql_3 += " IN(" + In_Con_Num + " ))) ";
+                sql_3 += " NEWTABLE on PMTH.FIELD_NAME = NEWTABLE.FIELD_NAME ";
+                
+                sql_3 += " where PMTH.TABLE_NAME = 'PPPMMS' ";
+                sql_3 += " and PMTH.MNG_NO = '1' ";
+                sql_3 += " and AUTH_TYPE <> 0 and PMHD.FIELD_NAME IN (" + In_Con_Num_where + ")";
+                sql_3 += " order by PMTH.FIELD_SEQ_NO ";
+                var result_3 = DbContext.Database.SqlQuery<EditInfo>(sql_3).ToList();
+                result_2.AddRange(result_3);
+
+                result_2.Sort((a, b) => Int32.Parse(a.FIELD_SEQ_NO) - Int32.Parse(b.FIELD_SEQ_NO));
+
+                return result_2;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<CHOUMON> GetChoumon(string CH_CODE,string START_DATE,string STOP_DATE)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                CH_CODE = DbContext.FixedSQLi(CH_CODE);
+                START_DATE = DbContext.FixedSQLi(START_DATE);
+                STOP_DATE = DbContext.FixedSQLi(STOP_DATE);
+                string sql = "select CH_CODE,CH_CODE_SETUMEI_1,START_DATE,STOP_DATE from CHCDMS where START_DATE <= '" +START_DATE +"' AND STOP_DATE >= '"+STOP_DATE +"' ORDER BY CH_CODE";
+                var result = DbContext.Database.SqlQuery<CHOUMON>(sql).ToList();
+                return result;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<TANTOU> GetTantou(string TANTO_CODE,string START_DATE,string STOP_DATE)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                TANTO_CODE = DbContext.FixedSQLi(TANTO_CODE);
+                START_DATE = DbContext.FixedSQLi(START_DATE);
+                STOP_DATE = DbContext.FixedSQLi(STOP_DATE);
+                string sql = "select TM.TANTO_CODE,TM.USER_ID,JNV.USER_NAME,TM.START_DATE,TM.STOP_DATE from CMTANTOMS TM ";
+                sql += " left join JNV_JNSHAIN_01 JNV on TM.USER_ID = JNV.USER_ID ";
+                sql +="where START_DATE <= '" + START_DATE + "' AND STOP_DATE >= '" + STOP_DATE + "' ORDER BY TANTO_CODE";
+                var result = DbContext.Database.SqlQuery<TANTOU>(sql).ToList();
+                return result;
+            }
+        }
+        [HttpGet]
+        [Route("api/KensakuBtnGet")]
+        public List<TANTAI>GetTantai(string TANI)
+        {
+            using (var DbContext = new TablesDbContext())
+            {
+                TANI = DbContext.FixedSQLi(TANI);
+                string sql = "select * from NRTANIMS";
+                var result = DbContext.Database.SqlQuery<TANTAI>(sql).ToList();
+                return result;
+            }
+        }
+
+        [HttpPost]
+        [Route("api/KensakuBtnPost")]
         // POST api/<controller>
         public void Post([FromBody]string value)
         {
+            using (var DbContext = new TablesDbContext())
+            {
+                // Singleは即座にDBにSelectコマンドを発行する
+                // contextにはUnchangedな状態のオブジェクトが入る
+                //var product = DbContext.Products.Single(x => x.Name == "Test");
+
+                // 取得したオブジェクトに変更を加える
+                // contextにはModifiedな状態のオブジェクトが入る
+                //product.Name = "別のものに書き換える";
+
+                // ここで初めてUpdate文が発行される
+                //DbContext.SaveChanges();
+            }
         }
 
         // PUT api/<controller>/5
