@@ -24,5 +24,6 @@ namespace Testapi.Models
         public string ENT_WHO{ get; set; }
         public string ENT_WHEN { get; set; }
         public string FIELD_VALUE { get; set; }
+        public string FIELD_EXPLAIN { get; set; }
     }
 }

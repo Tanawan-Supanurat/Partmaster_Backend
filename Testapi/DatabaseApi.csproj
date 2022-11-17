@@ -217,13 +217,18 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CHOUMON.cs" />
+    <Compile Include="Models\CMCODE.cs" />
     <Compile Include="Models\CM_KOUNOLIST.cs" />
     <Compile Include="Models\DialogKoumoku.cs" />
     <Compile Include="Models\EditInfo.cs" />
     <Compile Include="Models\HeaderID.cs" />
     <Compile Include="Models\IndividualSettting.cs" />
     <Compile Include="Models\KouteiCode.cs" />
+    <Compile Include="Models\MS_TABLE.cs" />
+    <Compile Include="Models\Pic.cs" />
     <Compile Include="Models\PMKensaku.cs" />
+    <Compile Include="Models\POST_PPPMMS.cs" />
+    <Compile Include="Models\POST_PPPMORDER.cs" />
     <Compile Include="Models\SqlTable.cs" />
     <Compile Include="Models\TANTAI.cs" />
     <Compile Include="Models\TANTOU.cs" />
