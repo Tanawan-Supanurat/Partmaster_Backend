@@ -542,5 +542,35 @@ namespace Testapi.Models
             sql += " ORDER BY sort_index,CM_CODE ";
             return sql;
         }
-    }
+
+        public static string GetSQLUnion(string MS_TABLE,string TABLE_NAME,string PLANT_NO)
+        {
+            string Union_SQL = "";
+            //共用マスター
+            Union_SQL += MS_TABLE == "1" ? " select CM_KOUNO,CM_CODE,CM_CODE_SETUMEI,null as FIELD_NAME from cmmsb where CM_KOUNO in (select MS_ITEM_NO from PPPMTABLEHDRMNG" +
+                                           " where table_name = '"+ TABLE_NAME +"' and MS_TABLE in ('1'))  " : "";
+            //注文コードマスター
+            Union_SQL += MS_TABLE == "2" ? " select CH_KOUNO CM_KOUNO,CH_CODE CM_CODE ,CH_CODE_SETUMEI_1 CM_CODE_SETUMEI,null as FIELD_NAME from CHCDMS  where CH_KOUNO in " + 
+                                           " (select MS_ITEM_NO from PPPMTABLEHDRMNG where table_name = '" + TABLE_NAME + "' and MS_TABLE in ('2')) " : "";
+            //単位読替マスタ
+            Union_SQL += MS_TABLE == "3" && TABLE_NAME != "ZKMS" ? " select TANTO_KUBUN CM_KOUNO , TANTO_CODE CM_CODE,USER_ID CM_CODE_SETUMEI,null as FIELD_NAME from CMTANTOMS where TANTO_KUBUN in " +
+                                                                 " (select MS_ITEM_NO from PPPMTABLEHDRMNG where PLANT_NO = '" + PLANT_NO + "' and table_name = '" + TABLE_NAME + "' and MS_TABLE in ('3')) " : "";
+            
+            //工程コードマスタ
+            //Union_SQL += MS_TABLE == '4' ?
+            //Union_SQL += MS_TABLE == '5' ?
+            return Union_SQL;
+        }
+        public static string getSQLUnion(string TABLE_NAME,string CC_CODE,string WC_CODE,string SG_CODE)
+        {
+            string Extra_Union = "";
+
+            Extra_Union += TABLE_NAME == "KTSTDTIME" ? " union select  null as CM_KOUNO,null as CM_CODE, CM_CODE_SETUMEI,FIELD_NAME from (select  TB1.SETUMEI SG_CODE, TB2.SETUMEI CC_CODE, TB3.CM_CODE_SETUMEI WC_CODE from   KTSGMS TB1   , KTCCMS TB2   , CMMSB TB3   , CMMSB TB4 "+
+                                                        " where TB1.WC_CODE = TB2.WC_CODE and TB1.CC_CODE = TB2.CC_CODE and TB3.CM_KOUNO = '020' and TB1.WC_CODE = TB3.CM_CODE and TB4.CM_KOUNO = '010' and TB3.DATA1 = TB4.CM_CODE and TB1.SG_KUBUN <> 'K' and " + 
+                                                        " TB1.WC_CODE = '"+ WC_CODE +"' and TB1.CC_CODE = '"+ CC_CODE +"' and TB1.SG_CODE = '"+SG_CODE+"') UNPIVOT(CM_CODE_SETUMEI for FIELD_NAME in(SG_CODE, CC_CODE, WC_CODE) ) " +
+                                                        " ) MS_1 on ( MS_1.CM_KOUNO = PMHD.MS_ITEM_NO and MS_1.CM_CODE = NEWTABLE.FIELD_VALUE) or  MS_1.FIELD_NAME = PMHD.FIELD_NAME  "
+                                                        : " ) MS_1 on  MS_1.CM_KOUNO = PMHD.MS_ITEM_NO and MS_1.CM_CODE = NEWTABLE.FIELD_VALUE ";
+            return Extra_Union;
+        }
+    }   
 }

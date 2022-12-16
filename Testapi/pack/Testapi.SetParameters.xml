@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="Default Web Site/DatabaseApi_deploy" />
+  <setParameter name="Testapi.Data.TablesDbContext-Web.config Connection String" value="Testapi.Data.TablesDbContext_ConnectionString" />
+  <setParameter name="oraFj01x-Web.config Connection String" value="User Id=DSAPP1;Password=XDSAPP1X;Data Source=FJ01x" />
+  <setParameter name="OracleDbContext-Web.config Connection String" value="User Id=oracle_user;Password=oracle_user_password;Data Source=oracle" />
+</parameters>

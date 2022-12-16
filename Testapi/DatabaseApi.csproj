@@ -194,6 +194,14 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile2.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile3.pubxml" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -203,43 +211,75 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\kensakuPageController.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Content Include="Controllers\kensakuPageController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Data\TablesDbContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AUTH_ST.cs" />
+    <Compile Include="Models\CHMSA.cs" />
+    <Compile Include="Models\CHMSA_TABLE.cs" />
+    <Compile Include="Models\CHMSB.cs" />
     <Compile Include="Models\CHOUMON.cs" />
     <Compile Include="Models\CMCODE.cs" />
     <Compile Include="Models\CM_KOUNOLIST.cs" />
+    <Compile Include="Models\COLUMNNAME.cs" />
+    <Compile Include="Models\Count_ENT.cs" />
     <Compile Include="Models\DialogKoumoku.cs" />
     <Compile Include="Models\EditInfo.cs" />
     <Compile Include="Models\HeaderID.cs" />
     <Compile Include="Models\IndividualSettting.cs" />
+    <Compile Include="Models\KOUBA.cs" />
+    <Compile Include="Models\KouteiJunjou.cs" />
     <Compile Include="Models\KouteiCode.cs" />
+    <Compile Include="Models\KTCODE.cs" />
+    <Compile Include="Models\KTSTDTIME.cs" />
     <Compile Include="Models\MS_TABLE.cs" />
+    <Compile Include="Models\NRPMA.cs" />
+    <Compile Include="Models\NRPMB.cs" />
+    <Compile Include="Models\NRPMHIS.cs" />
     <Compile Include="Models\Pic.cs" />
     <Compile Include="Models\PMKensaku.cs" />
     <Compile Include="Models\POST_PPPMMS.cs" />
     <Compile Include="Models\POST_PPPMORDER.cs" />
+    <Compile Include="Models\PPPMPOSPEC.cs" />
+    <Compile Include="Models\SG_CODE_DROPDOWN.cs" />
     <Compile Include="Models\SqlTable.cs" />
+    <Compile Include="Models\SYDBGRID.cs" />
     <Compile Include="Models\TANTAI.cs" />
     <Compile Include="Models\TANTOU.cs" />
     <Compile Include="Models\TESTCLASS.cs" />
+    <Compile Include="Models\UserSetting_DepartmentUsername.cs" />
+    <Compile Include="Models\User_Setting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
@@ -256,9 +296,23 @@
     <Folder Include="App_Data\" />
     <Folder Include="Views\KensakuPage_Backend\" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\</OutputPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
